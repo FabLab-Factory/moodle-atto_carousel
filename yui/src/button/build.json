@@ -1,0 +1,10 @@
+{
+    "name": "moodle-atto_carousel-button",
+    "builds": {
+        "moodle-atto_carousel-button": {
+            "jsfiles": [
+                "button.js"
+            ]
+        }
+    }
+}
