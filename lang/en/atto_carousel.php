@@ -34,6 +34,7 @@ $string['constrain'] = 'Auto size';
 $string['createimage'] = 'Insert image';
 $string['customstyle'] = 'Custom style';
 $string['enteralt'] = 'Describe this image for someone who cannot see it';
+$string['entercarouselid'] = 'Enter a unique id for the carousel that is not used anywhere else on your page e.g. carousel-1-en';
 $string['enterurl'] = 'Enter URL';
 $string['height'] = 'Height';
 $string['imageproperties'] = 'Image properties';

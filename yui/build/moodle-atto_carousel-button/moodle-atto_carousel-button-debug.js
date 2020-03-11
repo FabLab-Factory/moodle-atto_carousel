@@ -52,7 +52,8 @@ var CSS = {
   INPUTCUSTOMSTYLE: 'atto_carousel_customstyle',
   IMAGEPREVIEW: 'atto_carousel_preview',
   IMAGEPREVIEWBOX: 'atto_carousel_preview_box',
-  ALIGNSETTINGS: 'atto_carousel_button'
+  ALIGNSETTINGS: 'atto_carousel_button',
+  CAROUSELID: 'atto_carousel_id',
 },
 SELECTORS = {
   INPUTURL: '.' + CSS.INPUTURL
@@ -76,6 +77,15 @@ COMPONENTNAME = 'atto_carousel',
 TEMPLATE = '' +
     '<form class="atto_attoform">' +
         '<div class="container">' +
+
+        '<div class="row">' +
+            '<div class="col-12 mb-1">' +
+                '<label for="{{CSS.CAROUSELID}}">{{get_string "entercarouselid" component}}</label>' +
+                '<input class="form-control fullwidth {{CSS.CAROUSELID}} " type="text" ' +
+                'id="{{CSS.CAROUSELID}}" size="32"/>' +
+            '</div>' +
+        '</div>' +
+
         '<div class="row">' +
             '<div class="col-md-6">' +
                 // Add the repository browser button.
@@ -142,38 +152,22 @@ TEMPLATE = '' +
         '</div>' +
     '</form>',
 
-// old image template
-// IMAGETEMPLATE = '' +
-// '<img src="{{url}}" alt="Banner image" ' +
-//     'width="100%"' +
-//     'class="carousel"' +
-//     '{{#if id}}id="{{id}}" {{/if}}' +
-//     '/>',
-
-FIRSTIMAGETEMPLATE = '' +
-    '<div class="carousel-item active">' +
-    // slide number first-slide
-    '<img class="{{slidenumber}}" src="{{url}}" alt="Carousel slide">' +
-        '<div class="container">' +
-            '<div class="carousel-caption d-none d-md-block text-left">' +
-            '</div>' +
-        '</div>' +
-    '</div>';
-
 IMAGETEMPLATE = '' +
-    '<div class="carousel-item">' +
+    '<div class="carousel-item {{extraclasses}}">' +
     // slide number first-slide
-    '<img class="{{slidenumber}}" src="{{url}}" alt="Carousel slide">' +
+    '<img class="{{slidenumber}}" src="{{url}}" alt="Carousel slide" style="width:100%">' +
         '<div class="container">' +
             '<div class="carousel-caption d-none d-md-block text-left">' +
             '</div>' +
         '</div>' +
-    '</div>';
+    '</div>',
 
-CAROUSELTEMPLATE = '' +
+CAROUSELPRETEMPLATE = '' +
     '<div class="no-columns">' +
         '<div id="{{carouselid}}" class="carousel column-carousel slide" data-ride="carousel">' + 
-            '<div class="carousel-inner" role="listbox">' +
+            '<div class="carousel-inner" role="listbox">',
+
+CAROUSELPOSTTEMPLATE = '' +
                 // insert images here
             '</div>' +
             '<a class="carousel-control-prev invert" href="#{{carouselid}}" role="button" data-slide="prev">' +
@@ -185,7 +179,8 @@ CAROUSELTEMPLATE = '' +
                 '<span class="sr-only">Next</span>' +
             '</a>' +
         '</div>' +
-    '</div>';
+    '</div>' +
+    '<p><br></p>';
 
 Y.namespace('M.atto_carousel').Button = Y.Base.create('button', Y.M.editor_atto.EditorPlugin, [], {
 /**
@@ -499,7 +494,7 @@ _getDialogueContent: function() {
 
     var elementid = this.get('host').get('elementid');
 
-    this._attoform.one('.' + CSS.INPUTADDIMAGE).on('click', this._getAddNewImage(this._attoform, this._numberOfImages, elementid, CSS, COMPONENTNAME, canShowFilepicker, ALIGNMENTS, this), this);
+    this._attoform.one('.' + CSS.INPUTADDIMAGE).on('click', this._getAddNewImage(this._attoform, elementid, CSS, COMPONENTNAME, canShowFilepicker, ALIGNMENTS, this), this);
 
   return content;
 },
@@ -563,11 +558,12 @@ _filepickerCallback: function(params) {
         };
     },
 
-_getAddNewImage: function(element, numberOfImages, elementid, CSS, COMPONENTNAME, canShowFilepicker, ALIGNMENTS, context) {
+_getAddNewImage: function(element, elementid, CSS, COMPONENTNAME, canShowFilepicker, ALIGNMENTS, context) {
     return function() {
 
-        console.log('context', context);
-        var i = numberOfImages + 1;
+        context._numberOfImages = context._numberOfImages + 1;
+        var i = context._numberOfImages;
+
         var NEW_TEMPLATE = 
         '<div class="row">' +
             '<div class="col-md-6">' +
@@ -817,65 +813,13 @@ _urlChanged: function() {
 /**
 * Update the image in the contenteditable.
 *
-* @method _setImage
-* @param {EventFacade} e
-* @private
-*/
-_setImage: function(e) {
-  var form = this._attoform,
-      url = form.one('.' + CSS.INPUTURL).get('value'),
-      alignment = this._getAlignmentClass(form.one('.' + CSS.INPUTALIGNMENT).get('value')),
-      imagehtml,
-      customstyle = form.one('.' + CSS.INPUTCUSTOMSTYLE).get('value'),
-      classlist = [],
-      host = this.get('host');
-
-  e.preventDefault();
-
-  // Check if there are any accessibility issues.
-  if (this._updateWarning()) {
-      return;
-  }
-
-  // Focus on the editor in preparation for inserting the image.
-  host.focus();
-  if (url !== '') {
-      if (this._selectedImage) {
-          host.setSelection(host.getSelectionFromNode(this._selectedImage));
-      } else {
-          host.setSelection(this._currentSelection);
-      }
-
-      // Add the alignment class for the image.
-      classlist.push(alignment);
-
-      var template = Y.Handlebars.compile(IMAGETEMPLATE);
-      imagehtml = template({
-          url: url,
-          customstyle: customstyle,
-          classlist: classlist.join(' ')
-      });
-
-      this.get('host').insertContentAtFocusPoint(imagehtml);
-
-      this.markUpdated();
-  }
-
-  this.getDialogue({
-    focusAfterHide: null
-  }).hide();
-
-},
-
-
-/**
-* Update the image in the contenteditable.
-*
 * @method _setCarousel
 * @param {EventFacade} e
 * @private
 */
 _setCarousel: function(e) {
+    var carouselhtml = '';
+
     var host = this.get('host');
     e.preventDefault();
   
@@ -883,63 +827,52 @@ _setCarousel: function(e) {
     if (this._updateWarning()) {
         return;
     }
+    var carouselid = this._attoform.one('.' + CSS.CAROUSELID).get('value');
 
-    var carouseltemplate = Y.Handlebars.compile(CAROUSELTEMPLATE);
-    carousel = carouseltemplate({
-     carouselid: 'carousel-1-en',
+    var carouselpretemplate = Y.Handlebars.compile(CAROUSELPRETEMPLATE);
+    carouselpre = carouselpretemplate({
+     carouselid: carouselid,
     });
 
+    carouselhtml = carouselhtml + carouselpre;
+
+    for(var i = 1; i <= this._numberOfImages; i++){
+        
+        var url = this._attoform.one('.' + CSS.INPUTURL + '-' + i).get('value');
+        console.log('url', url);
+        if(url !== ''){
+            var extraclasses = '';
+            if(i == 1) {
+                extraclasses = 'active';
+            } 
+
+            var imagetemplate = Y.Handlebars.compile(IMAGETEMPLATE);
+            image = imagetemplate({
+                slidenumber: 'first-slide',
+                url: url,
+                extraclasses: extraclasses
+            });
+
+            carouselhtml = carouselhtml + image;
+        }
+    }
+
+    var carouselposttemplate = Y.Handlebars.compile(CAROUSELPOSTTEMPLATE);
+    carouselpost = carouselposttemplate({
+     carouselid: carouselid,
+    });
+
+    carouselhtml = carouselhtml + carouselpost;
+
     host.focus();
-    this.get('host').insertContentAtFocusPoint(carousel);
+    this.get('host').insertContentAtFocusPoint(carouselhtml);
   
     this.markUpdated();
-
-    // var form = this._attoform,
-    //     url = form.one('.' + CSS.INPUTURL).get('value'),
-    //     alignment = this._getAlignmentClass(form.one('.' + CSS.INPUTALIGNMENT).get('value')),
-    //     imagehtml,
-    //     customstyle = form.one('.' + CSS.INPUTCUSTOMSTYLE).get('value'),
-    //     classlist = [],
-    //     host = this.get('host');
-  
-    // e.preventDefault();
-  
-    // // Check if there are any accessibility issues.
-    // if (this._updateWarning()) {
-    //     return;
-    // }
-  
-    // // Focus on the editor in preparation for inserting the image.
-    // host.focus();
-    // if (url !== '') {
-    //     if (this._selectedImage) {
-    //         host.setSelection(host.getSelectionFromNode(this._selectedImage));
-    //     } else {
-    //         host.setSelection(this._currentSelection);
-    //     }
-  
-    //     // Add the alignment class for the image.
-    //     classlist.push(alignment);
-  
-    //     var template = Y.Handlebars.compile(IMAGETEMPLATE);
-    //     imagehtml = template({
-    //         url: url,
-    //         customstyle: customstyle,
-    //         classlist: classlist.join(' ')
-    //     });
-  
-    //     this.get('host').insertContentAtFocusPoint(imagehtml);
-  
-    //     this.markUpdated();
-    // }
   
     this.getDialogue({
       focusAfterHide: null
     }).hide();
-  
-  },
-
-
+},
 
 /**
 * Removes any legacy styles added by previous versions of the atto image button.

@@ -45,6 +45,7 @@ function atto_carousel_strings_for_js() {
         'imageproperties',
         'customstyle',
         'enterurl',
+        'entercarouselid',
         'enteralt',
         'height',
         'presentation',

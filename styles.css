@@ -59,6 +59,9 @@
 
 /* CUSTOMIZE THE CAROUSEL
 -------------------------------------------------- */
+.column-carousel {
+  width: 50%;
+}
 
 /* Carousel base class */
 .carousel {
@@ -71,28 +74,37 @@
   bottom: 3rem;
 }
 
-/* Declare heights because of positioning of img element */
-.carousel-item {
-  height: auto;
-  background-color: #FFFFFF;
-}
-.carousel-item img {
-/* padding-left: 60px;
-padding-right:60px;
-  margin-right:60px; */
-  width: 100%;
- height: auto;
+.carousel-inner {
+  width:100%; 
+  min-height: 100px !important;
+  max-height: 700px !important;
 }
 
-.slide-right {
-float: right;
+/* Declare heights because of positioning of img element */
+.carousel-item {
+  /* height: auto; */
+  background-color: #FFFFFF;
+  width: 100%;
+}
+
+
+/* .carousel-item img { */
+    /* padding-left: 60px;
+padding-right:60px;
+  margin-right:60px; */
+/*  width: 100%;
+ height: auto;
+} */
+
+/* .slide-right {
+  float: right;
 }
 
 .slide-left {
-max-width: 50%;
+  max-width: 50%;
  float: left;
-padding-right: 10px;
-}
+  padding-right: 10px;
+} */
 
 /* Additional carousel dark version */
 
