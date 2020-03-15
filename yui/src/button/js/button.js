@@ -107,18 +107,18 @@ TEMPLATE = '' +
                     '</div>' +
                 '{{/if}}' +
 
-                // Add the alignment selector.
-                '<div class="form-inline mb-1">' +
-                '<label class="for="{{elementid}}_{{CSS.INPUTALIGNMENT}}">{{get_string "alignment" component}}</label>' +
-                '<select class="custom-select {{CSS.INPUTALIGNMENT}}" id="{{elementid}}_{{CSS.INPUTALIGNMENT}}">' +
-                    '{{#each alignments}}' +
-                        '<option value="{{value}}">{{get_string str ../component}}</option>' +
-                    '{{/each}}' +
-                '</select>' +
-                '</div>' +
-                // Hidden input to store custom styles.
-                '<input type="hidden" class="{{CSS.INPUTCUSTOMSTYLE}}"/>' +
-                '<br/>' +
+                // // Add the alignment selector.
+                // '<div class="form-inline mb-1">' +
+                // '<label class="for="{{elementid}}_{{CSS.INPUTALIGNMENT}}">{{get_string "alignment" component}}</label>' +
+                // '<select class="custom-select {{CSS.INPUTALIGNMENT}}" id="{{elementid}}_{{CSS.INPUTALIGNMENT}}">' +
+                //     '{{#each alignments}}' +
+                //         '<option value="{{value}}">{{get_string str ../component}}</option>' +
+                //     '{{/each}}' +
+                // '</select>' +
+                // '</div>' +
+                // // Hidden input to store custom styles.
+                // '<input type="hidden" class="{{CSS.INPUTCUSTOMSTYLE}}"/>' +
+                // '<br/>' +
             
             '</div>' +
             '<div class="col-md-6">' +
@@ -161,8 +161,8 @@ IMAGETEMPLATE = '' +
     '</div>',
 
 CAROUSELPRETEMPLATE = '' +
-    '<div class="no-columns">' +
-        '<div id="{{carouselid}}" class="carousel column-carousel slide" data-ride="carousel">' + 
+    '<div class="column-carousel-right">' +
+        '<div id="{{carouselid}}" class="carousel slide" data-ride="carousel">' + 
             '<div class="carousel-inner" role="listbox">',
 
 CAROUSELPOSTTEMPLATE = '' +
@@ -236,7 +236,7 @@ initializer: function() {
       tagMatchRequiresAll: false
   });
   this.editor.delegate('dblclick', this._displayDialogue, '.carousel', this);
-  this.editor.delegate('click', this._handleClick, '.carousel', this);
+//   this.editor.delegate('click', this._handleClick, '.carousel', this);
   this.editor.on('drop', this._handleDragDrop, this);
 
   // e.preventDefault needed to stop the default event from clobbering the desired behaviour in some browsers.
@@ -248,123 +248,123 @@ initializer: function() {
   }, this);
 },
 
-/**
-* Handle a drag and drop event with an image.
-*
-* @method _handleDragDrop
-* @param {EventFacade} e
-* @return mixed
-* @private
-*/
-_handleDragDrop: function(e) {
+// /**
+// * Handle a drag and drop event with an image.
+// *
+// * @method _handleDragDrop
+// * @param {EventFacade} e
+// * @return mixed
+// * @private
+// */
+// _handleDragDrop: function(e) {
 
-  var self = this,
-      host = this.get('host'),
-      template = Y.Handlebars.compile(IMAGETEMPLATE);
+//   var self = this,
+//       host = this.get('host'),
+//       template = Y.Handlebars.compile(IMAGETEMPLATE);
 
-  host.saveSelection();
-  e = e._event;
+//   host.saveSelection();
+//   e = e._event;
 
-  // Only handle the event if an image file was dropped in.
-  var handlesDataTransfer = (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length);
-  if (handlesDataTransfer && /^image\//.test(e.dataTransfer.files[0].type)) {
+//   // Only handle the event if an image file was dropped in.
+//   var handlesDataTransfer = (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length);
+//   if (handlesDataTransfer && /^image\//.test(e.dataTransfer.files[0].type)) {
 
-      var options = host.get('filepickeroptions').image,
-          savepath = (options.savepath === undefined) ? '/' : options.savepath,
-          formData = new FormData(),
-          timestamp = 0,
-          uploadid = "",
-          xhr = new XMLHttpRequest(),
-          imagehtml = "",
-          keys = Object.keys(options.repositories);
+//       var options = host.get('filepickeroptions').image,
+//           savepath = (options.savepath === undefined) ? '/' : options.savepath,
+//           formData = new FormData(),
+//           timestamp = 0,
+//           uploadid = "",
+//           xhr = new XMLHttpRequest(),
+//           imagehtml = "",
+//           keys = Object.keys(options.repositories);
 
-      e.preventDefault();
-      e.stopPropagation();
-      formData.append('repo_upload_file', e.dataTransfer.files[0]);
-      formData.append('itemid', options.itemid);
+//       e.preventDefault();
+//       e.stopPropagation();
+//       formData.append('repo_upload_file', e.dataTransfer.files[0]);
+//       formData.append('itemid', options.itemid);
 
-      // List of repositories is an object rather than an array.  This makes iteration more awkward.
-      for (var i = 0; i < keys.length; i++) {
-          if (options.repositories[keys[i]].type === 'upload') {
-              formData.append('repo_id', options.repositories[keys[i]].id);
-              break;
-          }
-      }
-      formData.append('env', options.env);
-      formData.append('sesskey', M.cfg.sesskey);
-      formData.append('client_id', options.client_id);
-      formData.append('savepath', savepath);
-      formData.append('ctx_id', options.context.id);
+//       // List of repositories is an object rather than an array.  This makes iteration more awkward.
+//       for (var i = 0; i < keys.length; i++) {
+//           if (options.repositories[keys[i]].type === 'upload') {
+//               formData.append('repo_id', options.repositories[keys[i]].id);
+//               break;
+//           }
+//       }
+//       formData.append('env', options.env);
+//       formData.append('sesskey', M.cfg.sesskey);
+//       formData.append('client_id', options.client_id);
+//       formData.append('savepath', savepath);
+//       formData.append('ctx_id', options.context.id);
 
-      // Insert spinner as a placeholder.
-      timestamp = new Date().getTime();
-      uploadid = 'moodleimage_' + Math.round(Math.random() * 100000) + '-' + timestamp;
-      host.focus();
-      host.restoreSelection();
-      imagehtml = template({
-          url: M.util.image_url("i/loading_small", 'moodle'),
-          alt: M.util.get_string('uploading', COMPONENTNAME),
-          id: uploadid
-      });
-      host.insertContentAtFocusPoint(imagehtml);
-      self.markUpdated();
+//       // Insert spinner as a placeholder.
+//       timestamp = new Date().getTime();
+//       uploadid = 'moodleimage_' + Math.round(Math.random() * 100000) + '-' + timestamp;
+//       host.focus();
+//       host.restoreSelection();
+//       imagehtml = template({
+//           url: M.util.image_url("i/loading_small", 'moodle'),
+//           alt: M.util.get_string('uploading', COMPONENTNAME),
+//           id: uploadid
+//       });
+//       host.insertContentAtFocusPoint(imagehtml);
+//       self.markUpdated();
 
-      // Kick off a XMLHttpRequest.
-      xhr.onreadystatechange = function() {
-          var placeholder = self.editor.one('#' + uploadid),
-              result,
-              file,
-              newhtml,
-              newimage;
+//       // Kick off a XMLHttpRequest.
+//       xhr.onreadystatechange = function() {
+//           var placeholder = self.editor.one('#' + uploadid),
+//               result,
+//               file,
+//               newhtml,
+//               newimage;
 
-          if (xhr.readyState === 4) {
-              if (xhr.status === 200) {
-                  result = JSON.parse(xhr.responseText);
-                  if (result) {
-                      if (result.error) {
-                          if (placeholder) {
-                              placeholder.remove(true);
-                          }
-                          return new M.core.ajaxException(result);
-                      }
+//           if (xhr.readyState === 4) {
+//               if (xhr.status === 200) {
+//                   result = JSON.parse(xhr.responseText);
+//                   if (result) {
+//                       if (result.error) {
+//                           if (placeholder) {
+//                               placeholder.remove(true);
+//                           }
+//                           return new M.core.ajaxException(result);
+//                       }
 
-                      file = result;
-                      if (result.event && result.event === 'fileexists') {
-                          // A file with this name is already in use here - rename to avoid conflict.
-                          // Chances are, it's a different image (stored in a different folder on the user's computer).
-                          // If the user wants to reuse an existing image, they can copy/paste it within the editor.
-                          file = result.newfile;
-                      }
+//                       file = result;
+//                       if (result.event && result.event === 'fileexists') {
+//                           // A file with this name is already in use here - rename to avoid conflict.
+//                           // Chances are, it's a different image (stored in a different folder on the user's computer).
+//                           // If the user wants to reuse an existing image, they can copy/paste it within the editor.
+//                           file = result.newfile;
+//                       }
 
-                      // Replace placeholder with actual image.
-                      newhtml = template({
-                          url: file.url,
-                          presentation: true
-                      });
-                      newimage = Y.Node.create(newhtml);
-                      if (placeholder) {
-                          placeholder.replace(newimage);
-                      } else {
-                          self.editor.appendChild(newimage);
-                      }
-                      self.markUpdated();
-                  }
-              } else {
-                  Y.use('moodle-core-notification-alert', function() {
-                      new M.core.alert({message: M.util.get_string('servererror', 'moodle')});
-                  });
-                  if (placeholder) {
-                      placeholder.remove(true);
-                  }
-              }
-          }
-      };
-      xhr.open("POST", M.cfg.wwwroot + '/repository/repository_ajax.php?action=upload', true);
-      xhr.send(formData);
-      return false;
-  }
+//                       // Replace placeholder with actual image.
+//                       newhtml = template({
+//                           url: file.url,
+//                           presentation: true
+//                       });
+//                       newimage = Y.Node.create(newhtml);
+//                       if (placeholder) {
+//                           placeholder.replace(newimage);
+//                       } else {
+//                           self.editor.appendChild(newimage);
+//                       }
+//                       self.markUpdated();
+//                   }
+//               } else {
+//                   Y.use('moodle-core-notification-alert', function() {
+//                       new M.core.alert({message: M.util.get_string('servererror', 'moodle')});
+//                   });
+//                   if (placeholder) {
+//                       placeholder.remove(true);
+//                   }
+//               }
+//           }
+//       };
+//       xhr.open("POST", M.cfg.wwwroot + '/repository/repository_ajax.php?action=upload', true);
+//       xhr.send(formData);
+//       return false;
+//   }
 
-},
+// },
 
 /**
 * Handle a click on an image.
@@ -468,8 +468,8 @@ _getDialogueContent: function() {
           elementid: this.get('host').get('elementid'),
           CSS: CSS,
           component: COMPONENTNAME,
-          showFilepicker: canShowFilepicker,
-          alignments: ALIGNMENTS
+          showFilepicker: canShowFilepicker //,
+          //alignments: ALIGNMENTS
       }));
  
   this._attoform = content;
@@ -498,63 +498,45 @@ _getDialogueContent: function() {
 },
 
 /**
-* Update the dialogue after an image was selected in the File Picker.
-*
-* @method _filepickerCallback
-* @param {object} params The parameters provided by the filepicker
-* containing information about the image.
-* @private
-*/
-_filepickerCallback: function(params) {
-  if (params.url !== '') {
-      var input = this._attoform.one('.' + CSS.INPUTURL + '-1');
-      input.set('value', params.url);
+ * Returns the callback for the file picker to call after a file has been selected.
+ *
+ * @method _getFilepickerCallback
+ * @param  {Y.Node} element The element which triggered the callback (atto form)
+ * @param  {Number} indexImage The index of the image in the carousel that has been selected starting from 1
+ * @return {Function} The function to be used as a callback when the file picker returns the file
+ * @private
+ */
+_getFilepickerCallback: function(element, indexImage) {
+    return function(params) {
+        if (params.url !== '') {
+            var input = element.one('.' + CSS.INPUTURL + '-' + indexImage);
+            input.set('value', params.url);
 
-      // Load the preview image.
-      this._loadPreviewImage(params.url);
-  }
+            // Load the preview image.
+            var image = new Image();
+
+            image.onerror = function() {
+                var preview = element.one('.' + CSS.IMAGEPREVIEW + '-' + indexImage);
+                preview.setStyles({
+                    'display': 'none'
+                });
+            };
+
+            image.onload = function() {
+                var input;
+
+                input = element.one('.' + CSS.IMAGEPREVIEW + '-' + indexImage);
+                input.setAttribute('src', this.src);
+                input.setStyles({
+                    'display': 'inline'
+                });
+
+            };
+
+            image.src = params.url;
+        }
+    };
 },
-
-/**
-     * Returns the callback for the file picker to call after a file has been selected.
-     *
-     * @method _getFilepickerCallback
-     * @param  {Y.Node} element The element which triggered the callback (atto form)
-     * @param  {Number} indexImage The index of the image in the carousel that has been selected starting from 1
-     * @return {Function} The function to be used as a callback when the file picker returns the file
-     * @private
-     */
-    _getFilepickerCallback: function(element, indexImage) {
-        return function(params) {
-            if (params.url !== '') {
-                var input = element.one('.' + CSS.INPUTURL + '-' + indexImage);
-                input.set('value', params.url);
-
-                // Load the preview image.
-                var image = new Image();
-
-                image.onerror = function() {
-                    var preview = element.one('.' + CSS.IMAGEPREVIEW + '-' + indexImage);
-                    preview.setStyles({
-                        'display': 'none'
-                    });
-                };
-
-                image.onload = function() {
-                    var input;
-
-                    input = element.one('.' + CSS.IMAGEPREVIEW + '-' + indexImage);
-                    input.setAttribute('src', this.src);
-                    input.setStyles({
-                        'display': 'inline'
-                    });
-
-                };
-
-                image.src = params.url;
-            }
-        };
-    },
 
 _getAddNewImage: function(element, elementid, CSS, COMPONENTNAME, canShowFilepicker, ALIGNMENTS, context) {
     return function() {
@@ -586,18 +568,18 @@ _getAddNewImage: function(element, elementid, CSS, COMPONENTNAME, canShowFilepic
                     '</div>' +
                 '{{/if}}' +
 
-                // Add the alignment selector.
-                '<div class="form-inline mb-1">' +
-                '<label class="for="{{elementid}}_{{CSS.INPUTALIGNMENT}}">{{get_string "alignment" component}}</label>' +
-                '<select class="custom-select {{CSS.INPUTALIGNMENT}}" id="{{elementid}}_{{CSS.INPUTALIGNMENT}}">' +
-                    '{{#each alignments}}' +
-                        '<option value="{{value}}">{{get_string str ../component}}</option>' +
-                    '{{/each}}' +
-                '</select>' +
-                '</div>' +
-                // Hidden input to store custom styles.
-                '<input type="hidden" class="{{CSS.INPUTCUSTOMSTYLE}}"/>' +
-                '<br/>' +
+                // // Add the alignment selector.
+                // '<div class="form-inline mb-1">' +
+                // '<label class="for="{{elementid}}_{{CSS.INPUTALIGNMENT}}">{{get_string "alignment" component}}</label>' +
+                // '<select class="custom-select {{CSS.INPUTALIGNMENT}}" id="{{elementid}}_{{CSS.INPUTALIGNMENT}}">' +
+                //     '{{#each alignments}}' +
+                //         '<option value="{{value}}">{{get_string str ../component}}</option>' +
+                //     '{{/each}}' +
+                // '</select>' +
+                // '</div>' +
+                // // Hidden input to store custom styles.
+                // '<input type="hidden" class="{{CSS.INPUTCUSTOMSTYLE}}"/>' +
+                // '<br/>' +
             
             '</div>' +
             '<div class="col-md-6">' +
@@ -616,8 +598,8 @@ _getAddNewImage: function(element, elementid, CSS, COMPONENTNAME, canShowFilepic
           elementid: elementid,
           CSS: CSS,
           component: COMPONENTNAME,
-          showFilepicker: canShowFilepicker,
-          alignments: ALIGNMENTS
+          showFilepicker: canShowFilepicker //,
+          //alignments: ALIGNMENTS
         }));
 
         element.insert(new_content, Y.one('.' + CSS.ADDIMAGE));
@@ -689,24 +671,24 @@ _applyImageProperties: function(form, indexImage) {
   if (properties === false) {
       img.setStyle('display', 'none');
       // Set the default alignment.
-      ALIGNMENTS.some(function(alignment) {
-          if (alignment.isDefault) {
-              //form.one('.' + CSS.INPUTALIGNMENT).set('value', alignment.value);
-              return true;
-          }
+    //   ALIGNMENTS.some(function(alignment) {
+    //       if (alignment.isDefault) {
+    //           //form.one('.' + CSS.INPUTALIGNMENT).set('value', alignment.value);
+    //           return true;
+    //       }
 
-          return false;
-      }, this);
+    //       return false;
+    //   }, this);
 
       return;
   }
 
-  if (properties.align) {
-      form.one('.' + CSS.INPUTALIGNMENT).set('value', properties.align);
-  }
-  if (properties.customstyle) {
-      form.one('.' + CSS.INPUTCUSTOMSTYLE).set('value', properties.customstyle);
-  }
+//   if (properties.align) {
+//       form.one('.' + CSS.INPUTALIGNMENT).set('value', properties.align);
+//   }
+//   if (properties.customstyle) {
+//       form.one('.' + CSS.INPUTCUSTOMSTYLE).set('value', properties.customstyle);
+//   }
 
   if (properties.src) {
       form.one('.' + CSS.INPUTURL + '-' + indexImage).set('value', properties.src);
@@ -727,7 +709,7 @@ _getSelectedImageProperties: function() {
   var properties = {
           src: null,
           alt: null,
-          align: '',
+        //   align: '',
           presentation: false
       },
 
@@ -741,13 +723,14 @@ _getSelectedImageProperties: function() {
   }
 
   if (images && images.size()) {
-      image = this._removeLegacyAlignment(images.item(0));
+      //image = this._removeLegacyAlignment(images.item(0));
+      image = images.item(0);
       this._selectedImage = image;
 
       style = image.getAttribute('style');
-      properties.customstyle = style;
+      //properties.customstyle = style;
 
-      this._getAlignmentPropeties(image, properties);
+      //this._getAlignmentPropeties(image, properties);
       properties.src = image.getAttribute('src');
       properties.presentation = (image.get('role') === 'presentation');
       return properties;
@@ -767,29 +750,30 @@ _getSelectedImageProperties: function() {
 * @private
 */
 _getAlignmentPropeties: function(image, properties) {
-  var complete = false,
-      defaultAlignment;
+//   var complete = false,
+//       defaultAlignment;
 
-  // Check for an alignment value.
-  complete = ALIGNMENTS.some(function(alignment) {
-      var classname = this._getAlignmentClass(alignment.value);
-      if (image.hasClass(classname)) {
-          properties.align = alignment.value;
-          Y.log('Found alignment ' + alignment.value, 'debug', 'atto_carousel-button');
+//   // Check for an alignment value.
+//   complete = ALIGNMENTS.some(function(alignment) {
+//       var classname = this._getAlignmentClass(alignment.value);
+//       if (image.hasClass(classname)) {
+//           properties.align = alignment.value;
+//           Y.log('Found alignment ' + alignment.value, 'debug', 'atto_carousel-button');
 
-          return true;
-      }
+//           return true;
+//       }
 
-      if (alignment.isDefault) {
-          defaultAlignment = alignment.value;
-      }
+//       if (alignment.isDefault) {
+//           defaultAlignment = alignment.value;
+//       }
 
-      return false;
-  }, this);
+//       return false;
+//   }, this);
 
-  if (!complete && defaultAlignment) {
-      properties.align = defaultAlignment;
-  }
+//   if (!complete && defaultAlignment) {
+//       properties.align = defaultAlignment;
+//   }
+    return true;
 },
 
 /**
@@ -872,47 +856,47 @@ _setCarousel: function(e) {
     }).hide();
 },
 
-/**
-* Removes any legacy styles added by previous versions of the atto image button.
-*
-* @method _removeLegacyAlignment
-* @param {Y.Node} imageNode
-* @return {Y.Node}
-* @private
-*/
-_removeLegacyAlignment: function(imageNode) {
-  if (!imageNode.getStyle('margin')) {
-      // There is no margin therefore this cannot match any known alignments.
-      return imageNode;
-  }
+// /**
+// * Removes any legacy styles added by previous versions of the atto image button.
+// *
+// * @method _removeLegacyAlignment
+// * @param {Y.Node} imageNode
+// * @return {Y.Node}
+// * @private
+// */
+// _removeLegacyAlignment: function(imageNode) {
+//   if (!imageNode.getStyle('margin')) {
+//       // There is no margin therefore this cannot match any known alignments.
+//       return imageNode;
+//   }
 
-  ALIGNMENTS.some(function(alignment) {
-      if (imageNode.getStyle(alignment.name) !== alignment.value) {
-          // The name/value do not match. Skip.
-          return false;
-      }
+//   ALIGNMENTS.some(function(alignment) {
+//       if (imageNode.getStyle(alignment.name) !== alignment.value) {
+//           // The name/value do not match. Skip.
+//           return false;
+//       }
 
-      var normalisedNode = Y.Node.create('<div>');
-      normalisedNode.setStyle('margin', alignment.margin);
-      if (imageNode.getStyle('margin') !== normalisedNode.getStyle('margin')) {
-          // The margin does not match.
-          return false;
-      }
+//       var normalisedNode = Y.Node.create('<div>');
+//       normalisedNode.setStyle('margin', alignment.margin);
+//       if (imageNode.getStyle('margin') !== normalisedNode.getStyle('margin')) {
+//           // The margin does not match.
+//           return false;
+//       }
 
-      Y.log('Legacy alignment found and removed.', 'info', 'atto_carousel-button');
-      imageNode.addClass(this._getAlignmentClass(alignment.value));
-      imageNode.setStyle(alignment.name, null);
-      imageNode.setStyle('margin', null);
+//       Y.log('Legacy alignment found and removed.', 'info', 'atto_carousel-button');
+//       imageNode.addClass(this._getAlignmentClass(alignment.value));
+//       imageNode.setStyle(alignment.name, null);
+//       imageNode.setStyle('margin', null);
 
-      return true;
-  }, this);
+//       return true;
+//   }, this);
 
-  return imageNode;
-},
+//   return imageNode;
+// },
 
-_getAlignmentClass: function(alignment) {
-  return CSS.ALIGNSETTINGS + '_' + alignment;
-},
+// _getAlignmentClass: function(alignment) {
+//   return CSS.ALIGNSETTINGS + '_' + alignment;
+// },
 
 /**
 * Update the alt text warning live.

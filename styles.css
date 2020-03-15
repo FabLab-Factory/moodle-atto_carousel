@@ -59,8 +59,11 @@
 
 /* CUSTOMIZE THE CAROUSEL
 -------------------------------------------------- */
-.column-carousel {
+.column-carousel-right {
+  float: right;
   width: 50%;
+  padding-left: 1em;
+  padding-right: 1em;
 }
 
 /* Carousel base class */
@@ -75,7 +78,7 @@
 }
 
 .carousel-inner {
-  width:100%; 
+  /* width:100%;  */
   min-height: 100px !important;
   max-height: 700px !important;
 }
@@ -84,7 +87,7 @@
 .carousel-item {
   /* height: auto; */
   background-color: #FFFFFF;
-  width: 100%;
+  /* width: 100%; */
 }
 
 
